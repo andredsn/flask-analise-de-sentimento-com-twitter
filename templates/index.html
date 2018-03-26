@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta  http-equiv="refresh" content="20">
+</head>
+<body>
+{% extends "base.html" %}
+
+{% block content %}
+<table summary="Tabela com as informações da análise de sentimento">
+
+<caption>ANÁLISE DE SENTIMENTO</caption>
+<tr>
+<th scope="col">QUANTIDADE</th>
+<th scope="col">PERCENTUAL</th>
+</tr>
+
+<tr>
+<td>{{quantidade[0]}}</td>
+<td>{{percentual[0]}}</td>
+</tr>
+
+<tr>
+<td>{{quantidade[1]}}</td>
+<td>{{percentual[1]}}</td>
+</tr>
+
+<tr>
+<td>{{quantidade[2]}}</td>
+<td>{{percentual[2]}}</td>
+</tr>
+
+</table>
+{% endblock %}
+
+</body>
+</html>
