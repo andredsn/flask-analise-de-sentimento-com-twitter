@@ -1,5 +1,6 @@
 ﻿# coding=UTF-8
 import re
+import random as rn
 from unicodedata import normalize
 import nltk
 from sklearn import svm
@@ -10,10 +11,18 @@ from twython import Twython
 import pandas as pd
 
 conexao=None
+dfNovo=None
 
 def main():
+    # pega as variáveis globais
+    global conexao
+    global dfNovo
+    
     #palavras chaves para buscar no twitter
-    palavras_chaves=["violência, assédio, segurança"]
+    palavrasChaves=["política", "político", "futebol", "assalto", "assassino", "ladrão", "violência", "mata", "medo", "crime", "notícia", "noticiário", "operação", "policial", "assédio", "pânico", "roubo", "copa", "famoso", "artista", "favela", "mundo", "brasil", "orientação", "homem", "mulher", "criança", "briga", "segurança", "insegurança", "país", "paz", "jesus", "Deus", "igreja", "remédio", "medicina", "médico", "tiroteio", "troca", "internet", "Trump", "estados unidos", "guerra", "time", "club", "curso", "casal", "jornal", "rádio", "cidade", "capital", "morte", "trânsito", "intervenção", "campeão", "brasileiro", "bonito", "feio", "lindo", "bonita", "linda", "feia", "magro", "gordo", "magra", "gorda", "presidente", "ex", "guarda", "prefeito", "municipal", "recurso", "ministério", "público", "eleição", "dinheiro", "feliz", "felicidade", "professor", "aluno", "estudante", "apeaça", "manhã", "tarde", "noite", "hoje", "música", "ruin", "jornal", "cego", "deficiente", "poder", "instituto"]
+    
+    # escolhe uma palavra da lista para buscar no twitter
+    palavra=escolherPalavraDalista(palavrasChaves)
     
     #variável com id do ultimo twitter (obs: pode ser qualquer valor inteiro, mas o mesmo será sobrescrito após cada busca de tweets).
     id=930943609800679426
@@ -28,13 +37,14 @@ def main():
     desde='2014-01-01'
     
     #ler a base de tweets classificados
-    df=lerCSV(nomeArquivo)
+    dfTreino=lerCSV(nomeArquivo)
 
     #faz a conexão com o twitter
-    globals()[conexao]=conectarTwitter()
+    conexao=conectarTwitter()
     
     #faz a busca por tweet
-    tweetEncontrado=buscar(id, quantidade, palavras_chaves)
+    
+    tweetEncontrado=buscar(id, quantidade, palavra)
     
     #ccontinua o processo de classificação se for encontrado tweet
     
@@ -47,12 +57,12 @@ def main():
         
         #cria um dataframe com o novo tweet ainda não classificado
         dataframe =criarDF(tweet)
-
+        
         #trata o texto do tweet
         texto=etl(dataframe['texto'])
         
         #remove a coluna usuário do dataframe classificado
-        dft=removerColuna(df)
+        dft=removerColuna(dfTreino)
         
         #trata os textos
         dft['texto']=etl(dft['texto'])
@@ -69,7 +79,7 @@ def main():
         dataframe['sentimento']=classificacao
         
         #concatena o dataframe criado já classificado com o outro dataframe classificado
-        dfNovo=adicionarItem(df, dataframe)
+        dfNovo=adicionarItem(dfTreino, dataframe)
         
         #cria e subscreve a base de tweets classificados com o novo texto também classificado
         criarArquivo(dfNovo, nomeArquivo)
@@ -264,12 +274,12 @@ def conectarTwitter():
     consumer_secret = ""
     access_token = ""
     access_token_secret = ""
-
     conectado= Twython(consumer_key, consumer_secret, access_token, access_token_secret)
     return conectado
 
 def buscar(id, quantidade, palavras_chaves):
-    resultado = globals()[conexao].search(q=palavras_chaves, since_id=id, result_type='recent', locale='Brasil', lang='pt', count=1)
+    global conexao
+    resultado = conexao.search(q=palavras_chaves, since_id=id, result_type='recent', locale='Brasil', lang='pt', count=1)
     return resultado
 
 def adicionarNaLista(tweetsEncontrados):
@@ -342,3 +352,21 @@ def escolherMelhorClassificacao(c1, c2, c3):
         classe=dfClasse["classe"].loc[dfClasse["quantidade"]>1].values
         
     return classe
+
+def escolherPalavraDalista(palavrasChaves):
+    # escolhe um número aleatório do intervalo de 0 a tamanho da lista (n-1)
+    posicao=rn.sample(range(0, len(palavrasChaves)-1), 1)
+    
+    # faz um cast da variável posicao do tipo lista para int
+    posicao=int(posicao[0])
+    
+    # retorna a palavra escolhida da lista
+    return palavrasChaves[posicao]
+
+# função para pegar o dataframe criado depois da classificação do tweet encontrado
+def getDataFrame():
+    global dfNovo
+    return dfNovo
+
+# inicia o programa
+main()
