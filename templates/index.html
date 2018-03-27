@@ -6,8 +6,13 @@
 </head>
 <body>
 {% extends "base.html" %}
-
 {% block content %}
+<strong>
+Último tweet classificado:<br>
+{{texto}} ({{sentimento}})
+</strong>
+<br>
+
 <table summary="Tabela com as informações da análise de sentimento">
 
 <caption>ANÁLISE DE SENTIMENTO</caption>
@@ -31,6 +36,9 @@
 <td>{{percentual[2]}}</td>
 </tr>
 
+<tr>
+<td>Total: {{total}}</td>
+</tr>
 </table>
 {% endblock %}
 
